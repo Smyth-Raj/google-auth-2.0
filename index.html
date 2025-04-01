@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App - WhatsApp Style</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <img src="avatar.png" class="avatar" alt="User Avatar">
+            <span id="currentUser">User</span>
+        </div>
+
+        <div class="chat-box" id="messages"></div>
+
+        <div class="chat-input">
+            <input type="text" id="message" placeholder="Type a message...">
+            <button onclick="sendMessage()">📩</button>
+        </div>
+    </div>
+
+    <script>
+        let socket = io("http://localhost:3000");
+        let currentUser = prompt("Enter your username");
+
+        socket.emit("register", currentUser);
+        document.getElementById("currentUser").innerText = currentUser;
+
+        socket.on("receiveMessage", (data) => {
+            const chatBox = document.getElementById("messages");
+            const isMe = data.sender === currentUser;
+            chatBox.innerHTML += `
+                <div class="message ${isMe ? 'sent' : 'received'}">
+                    <span>${data.sender}: ${data.message}</span>
+                </div>
+            `;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        function sendMessage() {
+            const message = document.getElementById("message").value;
+            const receiver = prompt("Enter receiver's username");
+            socket.emit("sendMessage", { sender: currentUser, receiver, message });
+
+            document.getElementById("messages").innerHTML += `
+                <div class="message sent">
+                    <span>You: ${message}</span>
+                </div>
+            `;
+            document.getElementById("message").value = "";
+        }
+    </script>
+</body>
+</html>

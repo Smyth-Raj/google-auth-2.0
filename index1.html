@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User1 Chat</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            width: 350px;
+            height: 500px;
+            background-color: #222;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #0b7dda;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .chat-box p {
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+        }
+        .sent {
+            align-self: flex-end;
+            background: #0b7dda;
+            color: white;
+        }
+        .received {
+            align-self: flex-start;
+            background: #444;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: #333;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+        }
+        .chat-input button {
+            background: #0b7dda;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">User1 Chat</div>
+        <div class="chat-box" id="chat"></div>
+        <div class="chat-input">
+            <input type="text" id="message" placeholder="Type your message..." />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const socket = io("http://localhost:3000");
+
+        socket.emit("register", "User1");  // Register as User1
+
+        function sendMessage() {
+            const message = document.getElementById("message").value;
+            if (message.trim() === "") return;
+
+            socket.emit("sendMessage", { sender: "User1", receiver: "User2", message });
+
+            // Display the message on the sender's side
+            displayMessage("User1", message, "sent");
+            document.getElementById("message").value = ""; // Clear input
+        }
+
+        socket.on("receiveMessage", (data) => {
+            displayMessage(data.sender, data.message, "received");
+        });
+
+        function displayMessage(sender, message, type) {
+            const chatBox = document.getElementById("chat");
+            const msgElement = document.createElement("p");
+            msgElement.className = type;
+            msgElement.innerHTML = `<b>${sender}:</b> ${message}`;
+            chatBox.appendChild(msgElement);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll
+        }
+    </script>
+</body>
+</html>
