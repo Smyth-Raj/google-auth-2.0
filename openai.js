@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: "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",
+  apiKey: process.env.OPEN_AI_API_KEY
 });
 
 const completion = openai.chat.completions.create({
